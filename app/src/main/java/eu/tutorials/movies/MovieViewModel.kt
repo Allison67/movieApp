@@ -1,5 +1,4 @@
 package eu.tutorials.movies
-
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
