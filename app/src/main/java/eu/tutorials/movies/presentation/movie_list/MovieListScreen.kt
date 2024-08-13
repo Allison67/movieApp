@@ -1,6 +1,9 @@
-package eu.tutorials.movies.view
+package eu.tutorials.movies.presentation.movie_list
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,14 +11,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,25 +32,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import eu.tutorials.movies.MovieViewModel
-import eu.tutorials.movies.model.Movie
+import eu.tutorials.movies.common.Constants
+import eu.tutorials.movies.domain.model.Movie
+import eu.tutorials.movies.presentation.Screen
 
 
 
 @Composable
-fun MoviesScreen(viewModel: MovieViewModel, navigationToDetail: (Movie) -> Unit) {
-    val moviesState by viewModel.moviesState
-    var hasFetched by remember { mutableStateOf(false) }
+fun MovieListScreen(
+    navController: NavController,
+    viewModel: MovieListViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsState()
     var query by remember { mutableStateOf("") }
+    var hasFetched by remember { mutableStateOf(false) }
+
 
     Log.d("Debugging", "MoviesScreen Composable")
 
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = if (hasFetched) Arrangement.Top else Arrangement.Center
     ) {
         TextField(
             value = query,
@@ -57,7 +72,7 @@ fun MoviesScreen(viewModel: MovieViewModel, navigationToDetail: (Movie) -> Unit)
                 hasFetched = true
                 if (query.isEmpty()) {
                     Log.d("Debugging", "fetch")
-                    viewModel.fetchMovies()
+                    viewModel.getMovies()
                 } else {
                     Log.d("Debugging", "search")
                     viewModel.searchMovies(query)
@@ -67,23 +82,38 @@ fun MoviesScreen(viewModel: MovieViewModel, navigationToDetail: (Movie) -> Unit)
             Text("Fetch Movies")
         }
 
-        if (hasFetched || moviesState.list.isNotEmpty()) {
+        AnimatedVisibility(
+            visible = hasFetched || state.isLoading || state.movies.isNotEmpty(),
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
-                    moviesState.loading -> {
-                        //CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    state.isLoading -> {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
                     }
 
-                    moviesState.error != null -> {
-                        Text(text = "Error OCCURRED: ${moviesState.error}")
+                    state.error.isNotBlank() -> {
+                        Text(
+                            text = state.error,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp)
+                                .align(Alignment.Center)
+                        )
                     }
 
-                    else -> {
-                        MoviesList(moviesState.list, navigationToDetail)
+                    state.movies.isNotEmpty() -> {
+                        MoviesList(movies = state.movies, navigationToDetail = {
+                            navController.navigate(Screen.DetailScreen.route + "/${it.id}")
+                        })
                     }
                 }
             }
         }
+
     }
 
 }
@@ -110,7 +140,7 @@ fun MovieItem(movie: Movie, navigationToDetail: (Movie) -> Unit) {
     ) {
         Image(
             // get the image async
-            painter = rememberAsyncImagePainter(movie.poster_path),
+            painter = rememberAsyncImagePainter(Constants.POSTER_BASE_URL + movie.posterPath),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()

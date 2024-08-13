@@ -1,4 +1,4 @@
-package eu.tutorials.movies.model
+package eu.tutorials.movies.presentation
 
 sealed class Screen(val route: String) {
     object MoviesScreen: Screen("moviesscreen")

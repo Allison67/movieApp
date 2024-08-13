@@ -1,4 +1,4 @@
-package eu.tutorials.movies.model
+package eu.tutorials.movies.domain.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
@@ -7,8 +7,7 @@ import kotlinx.parcelize.Parcelize
 data class Movie(
     val id: Int,
     val title: String,
+    // overview can be removed here
     val overview: String,
-    val poster_path: String
+    val posterPath: String
 ): Parcelable
-
-data class MoviesResponse(val movies: List<Movie>)

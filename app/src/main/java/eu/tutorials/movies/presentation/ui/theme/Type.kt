@@ -1,4 +1,4 @@
-package eu.tutorials.movies.ui.theme
+package eu.tutorials.movies.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

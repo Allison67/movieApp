@@ -1,4 +1,4 @@
-package eu.tutorials.movies.ui.theme
+package eu.tutorials.movies.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build
