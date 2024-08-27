@@ -1,46 +1,31 @@
 package eu.tutorials.movies.presentation
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
-import eu.tutorials.movies.presentation.movie_detail.MovieDetailScreen
-import eu.tutorials.movies.presentation.movie_list.MovieListScreen
-import eu.tutorials.movies.presentation.ui.theme.MoviesTheme
+import eu.tutorials.movies.R
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var navController: NavController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            MoviesTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val navController = rememberNavController()
-                    NavHost(navController = navController, startDestination = Screen.MoviesScreen.route) {
-                        composable(
-                            route = Screen.MoviesScreen.route
-                        ) {
-                            MovieListScreen(navController = navController)
-                        }
-                        composable(
-                            route = Screen.DetailScreen.route + "/{movieId}"
-                        ) {
-                            MovieDetailScreen()
-                        }
-                    }
-                }
-            }
+        setContentView(R.layout.activity_main)
+
+        // Setup NavController
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.findNavController()
+    }
+
+    override fun onBackPressed() {
+        if (!navController.popBackStack()) {
+            super.onBackPressed()  // Let the system handle the back press if no fragments to pop
         }
     }
 }
-

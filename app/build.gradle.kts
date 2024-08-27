@@ -41,6 +41,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true // Enable View Binding with the correct syntax
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -55,6 +56,20 @@ android {
 
 
 dependencies {
+
+    // Navigation component
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.4")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.4")
+
+
+    implementation ("androidx.activity:activity-ktx:1.9.1")
+    implementation ("androidx.fragment:fragment-ktx:1.8.2")
+
+    // RecyclerView dependency
+    implementation ("androidx.recyclerview:recyclerview:1.3.1")
+
+    // Coil (for image loading)
+    implementation ("io.coil-kt:coil:2.4.0")
 
     implementation("com.google.dagger:hilt-android:2.52")
     kapt("com.google.dagger:hilt-android-compiler:2.52")
